@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RONZ GAMES - Kumpulan Game Mini</title>
+  <style>
+    :root {
+      --primary-bg: #1a1a2e;
+      --secondary-bg: #16213e;
+      --card-bg: rgba(30, 30, 50, 0.85);
+      --text-color: #e0e0e0;
+      --accent-color-1: #ff8a00;
+      --accent-color-2: #e52e71;
+      --btn-bg-1: #3a3a5a;
+      --btn-bg-2: #2a2a4a;
+      --btn-hover-bg-1: #4a4a6a;
+      --btn-hover-bg-2: #3a3a5a;
+      --win-color: #2ecc71;
+      --lose-color: #e74c3c;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%); color: var(--text-color); min-height: 100vh; padding: 20px; display: flex; justify-content: center; align-items: flex-start; }
+    .container { width: 100%; max-width: 1400px; margin: 0 auto; }
+    header { text-align: center; padding: 20px 0; background: rgba(0, 0, 0, 0.3); border-radius: 15px; margin-bottom: 25px; border: 1px solid rgba(255, 255, 255, 0.1); }
+    h1 { font-size: 2.8rem; margin-bottom: 10px; background: linear-gradient(to right, var(--accent-color-1), var(--accent-color-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+    .coin-display { display: inline-flex; align-items: center; background: rgba(0, 0, 0, 0.7); padding: 8px 25px; border-radius: 30px; font-size: 1.4rem; margin-top: 10px; border: 1px solid var(--accent-color-1); }
+    #coins { margin-left: 10px; font-weight: bold; }
+    .game-container { display: flex; flex-wrap: wrap; gap: 30px; margin-top: 20px; }
+    .game-list { flex: 1; min-width: 280px; background: var(--card-bg); border-radius: 15px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1); height: fit-content; }
+    .game-list h2 { border-bottom: 2px solid var(--accent-color-1); padding-bottom: 10px; margin-bottom: 15px; }
+    .game-btn { display: block; width: 100%; padding: 12px 8px; background: linear-gradient(to bottom, var(--btn-bg-1), var(--btn-bg-2)); color: var(--text-color); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; margin: 8px 0; text-align: left; }
+    .game-btn:hover { background: linear-gradient(to bottom, var(--btn-hover-bg-1), var(--btn-hover-bg-2)); border-color: var(--accent-color-1); transform: translateY(-2px); }
+    .game-area { flex: 3; min-width: 300px; background: var(--card-bg); border-radius: 15px; padding: 25px; display: flex; flex-direction: column; border: 1px solid rgba(255, 255, 255, 0.1); min-height: 500px; }
+    .game-title { font-size: 2rem; margin-bottom: 20px; color: var(--accent-color-2); font-weight: 700; }
+    .game-content { flex-grow: 1; position: relative; }
+    .result-box { margin-top: 20px; padding: 15px; border-radius: 10px; background: rgba(0, 0, 0, 0.5); text-align: center; font-size: 1.1rem; min-height: 50px; border: 1px solid transparent; transition: all 0.3s ease; }
+    .result-box.win { background-color: rgba(46, 204, 113, 0.2); border-color: var(--win-color); }
+    .result-box.lose { background-color: rgba(231, 76, 60, 0.2); border-color: var(--lose-color); }
+    .game-input { width: 100%; padding: 12px; font-size: 1rem; border-radius: 8px; border: 2px solid var(--btn-bg-1); background-color: #1e1e30; color: var(--text-color); margin: 10px 0; }
+    .game-action-btn { padding: 12px 25px; background: linear-gradient(to right, var(--accent-color-1), var(--accent-color-2)); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: transform 0.2s ease; font-size: 1rem; font-weight: bold; margin: 5px; }
+    .game-action-btn:hover { transform: scale(1.05); }
+    .game-canvas { background-color: #000; border-radius: 10px; border: 2px solid var(--btn-bg-1); }
+    
+    /* --- Style untuk Game Spesifik --- */
+    #hangman-word { letter-spacing: 10px; font-size: 2rem; margin: 20px 0; }
+    #hangman-letters button { width: 40px; height: 40px; margin: 4px; font-size: 1rem; }
+    #snake-board, #fruit-catcher-game { background-color: #111; border: 2px solid var(--accent-color-1); margin: 10px auto; display: block; }
+    #flappy-bird-game { background-color: #87CEEB; border: 2px solid var(--accent-color-1); margin: 10px auto; display: block; }
+    #grid-2048 { background-color: #3c3a39; border-radius: 10px; padding: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .grid-cell-2048 { width: 80px; height: 80px; background-color: rgba(238, 228, 218, 0.35); border-radius: 5px; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; }
+    .tile-2 { background-color: #eee4da; color: #776e65; } .tile-4 { background-color: #ede0c8; color: #776e65; } .tile-8 { background-color: #f2b179; color: #f9f6f2; } .tile-16 { background-color: #f59563; color: #f9f6f2; } .tile-32 { background-color: #f67c5f; color: #f9f6f2; } .tile-64 { background-color: #f65e3b; color: #f9f6f2; } .tile-128 { background-color: #edcf72; color: #f9f6f2; } .tile-256 { background-color: #edcc61; color: #f9f6f2; } .tile-512 { background-color: #edc850; color: #f9f6f2; } .tile-1024 { background-color: #edc53f; color: #f9f6f2; } .tile-2048 { background-color: #edc22e; color: #f9f6f2; }
+    #hanoi-towers { display: flex; justify-content: space-around; align-items: flex-end; height: 250px; border-bottom: 5px solid var(--accent-color-1); }
+    .hanoi-tower { width: 30%; height: 100%; border: 2px solid var(--btn-bg-1); border-bottom: none; border-radius: 5px 5px 0 0; display: flex; flex-direction: column-reverse; align-items: center; padding-bottom: 5px; }
+    .hanoi-disk { height: 20px; border-radius: 10px; cursor: pointer; transition: background-color 0.3s; }
+    .hanoi-disk:hover { filter: brightness(1.2); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎮 RONZ GAMES 🔥</h1>
+      <div class="coin-display">
+        Koin: <span id="coins">0</span>
+      </div>
+    </header>
+    
+    <div class="game-container">
+      <div class="game-list">
+        <h2>Daftar Game</h2>
+       
+        <button class="game-btn" onclick="startGame('hangman')">10. Hangman</button>
+        <button class="game-btn" onclick="startGame('ularTangga')">11. Ular Tangga</button>
+        <button class="game-btn" onclick="startGame('flappyBird')">12. Flappy Bird</button>
+        <button class="game-btn" onclick="startGame('blokGeser2048')">13. Blok Geser (2048)</button>
+        <button class="game-btn" onclick="startGame('menaraHanoi')">14. Menara Hanoi</button>
+        <button class="game-btn" onclick="startGame('tangkapBuah')">15. Tangkap Buah</button>
+      </div>
+      
+      <div class="game-area">
+        <div class="game-title" id="gameTitle">Selamat Datang!</div>
+        <div class="game-content" id="gameContent">
+          <p>Silakan pilih game dari daftar di sebelah kiri untuk memulai petualangan Anda.<br><br>Kumpulkan koin sebanyak-banyaknya dengan memenangkan setiap permainan. Selamat bermain!</p>
+        </div>
+        <div class="result-box" id="resultBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const gameTitle = document.getElementById('gameTitle');
+    const gameContent = document.getElementById('gameContent');
+    const resultBox = document.getElementById('resultBox');
+    let coins = 0;
+    
+    let activeIntervals = [];
+    let activeGameLoop;
+
+    function updateCoins(amount) {
+        coins += amount;
+        document.getElementById('coins').innerText = coins;
+    }
+    
+    function showResult(message, isWin) {
+        resultBox.innerText = message;
+        resultBox.className = 'result-box';
+        if (isWin === true) resultBox.classList.add('win');
+        else if (isWin === false) resultBox.classList.add('lose');
+    }
+
+    function clearTimers() {
+        activeIntervals.forEach(clearInterval);
+        activeIntervals = [];
+        if (activeGameLoop) {
+            cancelAnimationFrame(activeGameLoop);
+            activeGameLoop = null;
+        }
+    }
+    
+    function startGame(game) {
+        clearTimers();
+        showResult('', null);
+        const gameFunctions = {
+            hangman, ularTangga,
+            flappyBird, blokGeser2048, menaraHanoi, tangkapBuah
+        };
+        
+        if (gameFunctions[game]) {
+            gameFunctions[game]();
+        } else {
+            gameTitle.innerText = 'Error';
+            gameContent.innerHTML = '<p>Game tidak ditemukan.</p>';
+        }
+    }
+    
+    // --- Implementasi Game (1-14 disembunyikan untuk ringkasan, kode lengkap ada di prompt sebelumnya) ---
+    function tebakAngka() {
+    gameTitle.innerText = 'Tebak Angka';
+    const angkaBenar = Math.floor(Math.random() * 10) + 1;
+
+    function endGame(win) {
+        document.getElementById('submit-tebakan').disabled = true;
+        if (win) {
+            showResult('🎉 Benar! Kamu menang dan dapat 20 koin!', true);
+            updateCoins(20);
+        } else {
+            showResult(`❌ Salah. Angka yang benar adalah ${angkaBenar}`, false);
+        }
+        gameContent.innerHTML += `<br><br><button class="game-action-btn" onclick="tebakAngka()">Main Lagi</button>`;
+    }
+
+    gameContent.innerHTML = `
+        <p>Tebak angka dari 1 sampai 10</p>
+        <input type="number" id="tebak-input" class="game-input" placeholder="Angka tebakan kamu">
+        <br><br>
+        <button class="game-action-btn" id="submit-tebakan">Cek Jawaban</button>
+    `;
+
+    document.getElementById('submit-tebakan').addEventListener('click', () => {
+        const tebakan = parseInt(document.getElementById('tebak-input').value);
+        if (tebakan === angkaBenar) {
+            endGame(true);
+        } else {
+            endGame(false);
+        }
+    });
+}
+    function hitungCepat() { gameTitle.innerText = 'Hitung Cepat'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function batuGuntingKertas() { gameTitle.innerText = 'Batu Gunting Kertas'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function pilihWarnaTeks() { gameTitle.innerText = 'Pilih Warna Teks'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function memoryCard() { gameTitle.innerText = 'Memory Card'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function reaksiCepat() { gameTitle.innerText = 'Reaksi Cepat'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function tebakEmoji() { gameTitle.innerText = 'Tebak Emoji'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function ketukTikusTanah() { gameTitle.innerText = 'Ketuk Tikus Tanah'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function tekaTekiKata() { gameTitle.innerText = 'Teka-Teki Kata'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function kuisPengetahuanUmum() { gameTitle.innerText = 'Kuis Pengetahuan Umum'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function simonBerkata() { gameTitle.innerText = 'Simon Berkata'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function ticTacToe() { gameTitle.innerText = 'Tic-Tac-Toe'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function tesKecepatanMengetik() { gameTitle.innerText = 'Tes Kecepatan Mengetik'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+    function pemecahKode() { gameTitle.innerText = 'Pemecah Kode'; gameContent.innerHTML = 'Game belum diimplementasikan.'; }
+
+    // --- Game 15: Hangman ---
+    function hangman() {
+        gameTitle.innerText = 'Hangman';
+        const words = ['JAVASCRIPT', 'PENGEMBANG', 'ANTARMUKA', 'TANTANGAN', 'PERMAINAN'];
+        const word = words[Math.floor(Math.random() * words.length)];
+        let guessedLetters = [];
+        let wrongGuesses = 0;
+        
+        function updateWordDisplay() {
+            const display = word.split('').map(letter => guessedLetters.includes(letter) ? letter : '_').join('');
+            document.getElementById('hangman-word').innerText = display;
+            if (!display.includes('_')) {
+                endGame(true);
+            }
+        }
+
+        function handleGuess(letter) {
+            if (guessedLetters.includes(letter)) return;
+            guessedLetters.push(letter);
+            document.querySelector(`button[data-letter="${letter}"]`).disabled = true;
+            if (word.includes(letter)) {
+                updateWordDisplay();
+            } else {
+                wrongGuesses++;
+                document.getElementById('hangman-drawing').innerText = `Kesalahan: ${wrongGuesses}/6`;
+                if (wrongGuesses >= 6) {
+                    endGame(false);
+                }
+            }
+        }
+
+        function endGame(win) {
+            document.querySelectorAll('#hangman-letters button').forEach(b => b.disabled = true);
+            if (win) {
+                showResult('🎉 Selamat, kamu menang! Dapat 25 koin.', true);
+                updateCoins(25);
+            } else {
+                showResult(`❌ Kamu kalah! Katanya adalah "${word}".`, false);
+            }
+            gameContent.innerHTML += `<br><br><button class="game-action-btn" onclick="hangman()">Main Lagi</button>`;
+        }
+        
+        let lettersHTML = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l => `<button class="game-action-btn" data-letter="${l}">${l}</button>`).join('');
+        gameContent.innerHTML = `
+            <p>Tebak kata rahasianya sebelum terlambat!</p>
+            <div id="hangman-drawing" style="font-size: 1.2rem; margin: 10px 0;">Kesalahan: 0/6</div>
+            <div id="hangman-word"></div>
+            <div id="hangman-letters">${lettersHTML}</div>
+        `;
+        document.querySelectorAll('#hangman-letters button').forEach(b => b.onclick = () => handleGuess(b.dataset.letter));
+        updateWordDisplay();
+    }
+    
+    // --- Game 16: Ular Tangga ---
+    function ularTangga() {
+        gameTitle.innerText = 'Ular Tangga';
+        const boardSize = 30;
+        const snakes = { 28: 10, 22: 5, 15: 2 };
+        const ladders = { 3: 18, 8: 14, 20: 29 };
+        let playerPos = 1;
+        let computerPos = 1;
+
+        function rollDice() {
+            return Math.floor(Math.random() * 6) + 1;
+        }
+
+        function movePlayer(player, currentPos, dice) {
+            let newPos = currentPos + dice;
+            if (newPos > boardSize) newPos = currentPos; // Tidak bisa melebihi finish
+            if (snakes[newPos]) newPos = snakes[newPos];
+            if (ladders[newPos]) newPos = ladders[newPos];
+            return newPos;
+        }
+
+        function updateDisplay() {
+            gameContent.innerHTML = `
+                <p>Lemparkan dadu dan capai kotak 30 lebih dulu!</p>
+                <div>Pemain: Kotak ${playerPos}</div>
+                <div>Komputer: Kotak ${computerPos}</div>
+                <br>
+                <button id="roll-btn" class="game-action-btn">Lemparkan Dadu</button>
+            `;
+            document.getElementById('roll-btn').onclick = playerTurn;
+        }
+        
+        function playerTurn() {
+            const dice = rollDice();
+            playerPos = movePlayer('Pemain', playerPos, dice);
+            showResult(`Kamu mendapat ${dice} dan mendarat di kotak ${playerPos}.`, null);
+            if (playerPos === boardSize) { endGame(true); return; }
+            updateDisplay();
+            document.getElementById('roll-btn').disabled = true;
+            setTimeout(computerTurn, 1000);
+        }
+
+        function computerTurn() {
+            const dice = rollDice();
+            computerPos = movePlayer('Komputer', computerPos, dice);
+            showResult(`Komputer mendapat ${dice} dan mendarat di kotak ${computerPos}.`, null);
+            if (computerPos === boardSize) { endGame(false); return; }
+            updateDisplay();
+        }
+        
+        function endGame(playerWins) {
+            if (playerWins) {
+                showResult('🎉 Kamu menang! Dapat 30 koin.', true);
+                updateCoins(30);
+            } else {
+                showResult('❌ Komputer menang!', false);
+            }
+            gameContent.innerHTML += `<br><br><button class="game-action-btn" onclick="ularTangga()">Main Lagi</button>`;
+        }
+        updateDisplay();
+    }
+    
+    // --- Game 17: Flappy Bird ---
+    function flappyBird() {
+        gameTitle.innerText = 'Flappy Bird';
+        gameContent.innerHTML = `<p>Klik untuk melompat dan hindari pipa. Hati-hati, ini sulit!</p><canvas id="flappy-bird-game" width="400" height="500" class="game-canvas"></canvas>`;
+        const canvas = document.getElementById('flappy-bird-game');
+        const ctx = canvas.getContext('2d');
+        
+        let bird = { x: 50, y: 150, width: 40, height: 30, velocity: 0 };
+        let pipes = [];
+        let score = 0;
+        let frame = 0;
+        const gravity = 0.5;
+        const jump = -8;
+
+        document.addEventListener('keydown', e => { if (e.code === 'Space') bird.velocity = jump; });
+        canvas.addEventListener('click', () => bird.velocity = jump);
+        
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Bird
+            bird.velocity += gravity;
+            bird.y += bird.velocity;
+            ctx.fillStyle = 'yellow';
+            ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+
+            // Pipes
+            if (frame % 90 === 0) {
+                let pipeY = Math.random() * (canvas.height - 250) + 50;
+                pipes.push({ x: canvas.width, y: 0, width: 50, height: pipeY, passed: false });
+                pipes.push({ x: canvas.width, y: pipeY + 150, width: 50, height: canvas.height, passed: false });
+            }
+            
+            pipes.forEach(pipe => {
+                pipe.x -= 3;
+                ctx.fillStyle = 'green';
+                ctx.fillRect(pipe.x, pipe.y, pipe.width, pipe.height);
+                // Collision
+                if (bird.x < pipe.x + pipe.width && bird.x + bird.width > pipe.x && bird.y < pipe.y + pipe.height && bird.y + bird.height > pipe.y) {
+                    endGame(); return;
+                }
+                if (pipe.x + pipe.width < bird.x && !pipe.passed) {
+                    score += 0.5; // karena ada 2 pipa (atas bawah)
+                    pipe.passed = true;
+                }
+            });
+            pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
+
+            // Ground collision
+            if (bird.y + bird.height > canvas.height || bird.y < 0) {
+                endGame(); return;
+            }
+
+            ctx.fillStyle = 'white';
+            ctx.font = '25px Arial';
+            ctx.fillText(`Skor: ${score}`, 10, 30);
+            frame++;
+            activeGameLoop = requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            cancelAnimationFrame(activeGameLoop);
+            showResult(`Game Over! Skor akhir: ${score}. Kamu dapat ${score} koin.`, false);
+            updateCoins(score);
+            gameContent.innerHTML += `<br><br><button class="game-action-btn" onclick="flappyBird()">Coba Lagi</button>`;
+        }
+        gameLoop();
+    }
+
+    // --- Game 18: Blok Geser (2048) ---
+    function blokGeser2048() {
+        gameTitle.innerText = 'Blok Geser (2048)';
+        gameContent.innerHTML = `<p>Gunakan tombol panah untuk menggeser dan menggabungkan blok.</p>
+            <div id="grid-2048"></div>
+            <p>Skor: <span id="score-2048">0</span></p>`;
+        
+        const gridDisplay = document.getElementById('grid-2048');
+        let squares = [];
+        let score = 0;
+
+        function createBoard() {
+            for (let i=0; i<16; i++) {
+                let square = document.createElement('div');
+                square.className = 'grid-cell-2048';
+                square.innerHTML = 0;
+                gridDisplay.appendChild(square);
+                squares.push(square);
+            }
+            generate(); generate();
+        }
+
+        function generate() {
+            let emptySquares = squares.filter(s => s.innerHTML == 0);
+            if (emptySquares.length > 0) {
+                let randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+                randomSquare.innerHTML = Math.random() > 0.9 ? 4 : 2;
+                updateColors();
+            }
+        }
+        
+        function updateColors() {
+            squares.forEach(s => {
+                s.className = 'grid-cell-2048';
+                if (s.innerHTML != 0) s.classList.add('tile-' + s.innerHTML);
+            });
+        }
+
+        function move(direction) {
+            let rows = [];
+            for (let i=0; i<4; i++) {
+                if (direction === 'right' || direction === 'left') {
+                    rows.push(Array.from({length: 4}, (_, j) => squares[i*4 + j]));
+                } else {
+                    rows.push(Array.from({length: 4}, (_, j) => squares[i + j*4]));
+                }
+            }
+            if (direction === 'right' || direction === 'down') rows.forEach(row => row.reverse());
+            
+            let moved = false;
+            rows.forEach(row => {
+                let filteredRow = row.map(s => parseInt(s.innerHTML)).filter(num => num);
+                for (let i=0; i<filteredRow.length - 1; i++) {
+                    if (filteredRow[i] === filteredRow[i+1]) {
+                        filteredRow[i] *= 2;
+                        score += filteredRow[i];
+                        filteredRow.splice(i+1, 1);
+                    }
+                }
+                let newRow = filteredRow.concat(Array(4 - filteredRow.length).fill(0));
+                row.forEach((s, i) => {
+                    if (parseInt(s.innerHTML) !== newRow[i]) moved = true;
+                    s.innerHTML = newRow[i];
+                });
+            });
+            if (moved) generate();
+            updateColors();
+            document.getElementById('score-2048').innerText = score;
+            checkGameOver();
+        }
+
+        function checkGameOver() {
+            let zeros = squares.filter(s => s.innerHTML == 0).length;
+            if (zeros > 0) return;
+            for (let i=0; i<15; i++) {
+                if ((i+1)%4 !== 0 && squares[i].innerHTML === squares[i+1].innerHTML) return;
+                if (i<12 && squares[i].innerHTML === squares[i+4].innerHTML) return;
+            }
+            showResult(`Game Over! Skor akhir: ${score}.`, false);
+            updateCoins(Math.floor(score/10));
+            document.removeEventListener('keyup', control);
+        }
+
+        function control(e) {
+            if (e.key === 'ArrowLeft') move('left');
+            else if (e.key === 'ArrowRight') move('right');
+            else if (e.key === 'ArrowUp') move('up');
+            else if (e.key === 'ArrowDown') move('down');
+        }
+        document.addEventListener('keyup', control);
+        createBoard();
+    }
+    
+    // --- Game 19: Menara Hanoi ---
+    function menaraHanoi() {
+        gameTitle.innerText = 'Menara Hanoi';
+        let towers = [[3, 2, 1], [], []];
+        let selectedTower = null;
+        let moves = 0;
+        const diskColors = ['#e74c3c', '#3498db', '#2ecc71'];
+
+        function render() {
+            gameContent.innerHTML = `
+                <p>Pindahkan semua piringan ke tiang paling kanan. (Piringan besar tidak boleh di atas piringan kecil)</p>
+                <div id="hanoi-towers">
+                    ${towers.map((tower, i) => `
+                        <div class="hanoi-tower" data-tower="${i}">
+                            ${tower.map(disk => `<div class="hanoi-disk" style="width:${disk*25+20}%; background-color:${diskColors[disk-1]}"></div>`).join('')}
+                        </div>
+                    `).join('')}
+                </div>
+                <p>Langkah: ${moves}</p>
+            `;
+            document.querySelectorAll('.hanoi-tower').forEach(t => t.onclick = () => handleTowerClick(parseInt(t.dataset.tower)));
+        }
+
+        function handleTowerClick(towerIndex) {
+            if (selectedTower === null) {
+                if (towers[towerIndex].length > 0) {
+                    selectedTower = towerIndex;
+                    document.querySelector(`[data-tower="${towerIndex}"]`).style.backgroundColor = 'rgba(255,255,255,0.2)';
+                }
+            } else {
+                const fromTower = towers[selectedTower];
+                const toTower = towers[towerIndex];
+                if (toTower.length === 0 || fromTower[fromTower.length-1] < toTower[toTower.length-1]) {
+                    toTower.push(fromTower.pop());
+                    moves++;
+                }
+                selectedTower = null;
+                render();
+                checkWin();
+            }
+        }
+
+        function checkWin() {
+            if (towers[2].length === 3) {
+                showResult(`🎉 Selamat! Kamu menyelesaikan dalam ${moves} langkah. Dapat 50 koin.`, true);
+                updateCoins(50);
+                document.querySelectorAll('.hanoi-tower').forEach(t => t.onclick = null);
+            }
+        }
+        render();
+    }
+    
+    // --- Game 20: Tangkap Buah ---
+    function tangkapBuah() {
+        gameTitle.innerText = 'Tangkap Buah';
+        gameContent.innerHTML = `<p>Gunakan panah kiri/kanan untuk menggerakkan keranjang.</p><canvas id="fruit-catcher-game" width="500" height="400" class="game-canvas"></canvas>`;
+        const canvas = document.getElementById('fruit-catcher-game');
+        const ctx = canvas.getContext('2d');
+
+        let basket = { x: canvas.width / 2 - 25, y: canvas.height - 30, width: 50, height: 20 };
+        let items = [];
+        let score = 0;
+        let gameOver = false;
+        let keys = {};
+
+        document.addEventListener('keydown', e => keys[e.key] = true);
+        document.addEventListener('keyup', e => keys[e.key] = false);
+        
+        function gameLoop() {
+            if (gameOver) return;
+            // Update
+            if (keys['ArrowLeft'] && basket.x > 0) basket.x -= 5;
+            if (keys['ArrowRight'] && basket.x < canvas.width - basket.width) basket.x += 5;
+
+            if (Math.random() < 0.03) {
+                let isFruit = Math.random() > 0.2;
+                items.push({
+                    x: Math.random() * (canvas.width - 20),
+                    y: 0,
+                    type: isFruit ? 'fruit' : 'bomb',
+                    color: isFruit ? 'green' : 'red'
+                });
+            }
+
+            items.forEach((item, index) => {
+                item.y += 3;
+                if (item.y > canvas.height) items.splice(index, 1);
+                if (item.x < basket.x + basket.width && item.x + 20 > basket.x && item.y < basket.y + basket.height && item.y + 20 > basket.y) {
+                    if (item.type === 'fruit') {
+                        score++;
+                    } else {
+                        endGame();
+                    }
+                    items.splice(index, 1);
+                }
+            });
+
+            // Draw
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'brown';
+            ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+            items.forEach(item => {
+                ctx.fillStyle = item.color;
+                ctx.beginPath();
+                ctx.arc(item.x + 10, item.y + 10, 10, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Skor: ${score}`, 10, 25);
+            
+            activeGameLoop = requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            gameOver = true;
+            cancelAnimationFrame(activeGameLoop);
+            showResult(`Game Over! Skor akhir: ${score}. Kamu dapat ${score*2} koin.`, false);
+            updateCoins(score * 2);
+            gameContent.innerHTML += `<br><br><button class="game-action-btn" onclick="tangkapBuah()">Main Lagi</button>`;
+        }
+        gameLoop();
+    }
+
+  </script>
+ 
+</body>
+
+</html>

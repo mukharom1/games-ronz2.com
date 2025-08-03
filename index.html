@@ -510,76 +510,101 @@
     
     // --- Game 20: Tangkap Buah ---
     function tangkapBuah() {
-        gameTitle.innerText = 'Tangkap Buah';
-        gameContent.innerHTML = `<p>Gunakan panah kiri/kanan untuk menggerakkan keranjang.</p><canvas id="fruit-catcher-game" width="500" height="400" class="game-canvas"></canvas>`;
-        const canvas = document.getElementById('fruit-catcher-game');
-        const ctx = canvas.getContext('2d');
+    gameTitle.innerText = 'Tangkap Buah';
+    gameContent.innerHTML = `
+        <p>Tekan tombol ⬅️ ➡️ untuk menggerakkan keranjang.</p>
+        <canvas id="fruit-catcher-game" class="game-canvas"></canvas>
+        <div style="text-align:center; margin-top:10px;">
+            <button onclick="moveBasket(-1)" style="font-size: 32px; margin-right: 20px;">⬅️</button>
+            <button onclick="moveBasket(1)" style="font-size: 32px;">➡️</button>
+        </div>
+    `;
 
-        let basket = { x: canvas.width / 2 - 25, y: canvas.height - 30, width: 50, height: 20 };
-        let items = [];
-        let score = 0;
-        let gameOver = false;
-        let keys = {};
+    const canvas = document.getElementById('fruit-catcher-game');
+    
+    const ctx = canvas.getContext('2d');
+canvas.width = canvas.clientWidth;
+canvas.height = canvas.clientHeight;
+    let basket = { x: canvas.width / 2 - 25, y: canvas.height - 40, size: 35 };
+    let items = [];
+    let score = 0;
+    let gameOver = false;
+    let activeGameLoop;
 
-        document.addEventListener('keydown', e => keys[e.key] = true);
-        document.addEventListener('keyup', e => keys[e.key] = false);
-        
-        function gameLoop() {
-            if (gameOver) return;
-            // Update
-            if (keys['ArrowLeft'] && basket.x > 0) basket.x -= 5;
-            if (keys['ArrowRight'] && basket.x < canvas.width - basket.width) basket.x += 5;
+    const fruits = ['🍎', '🍌', '🍇', '🍉', '🍓,'🍥','🥞','🍔'];
+    const bomb = '💣';
+    const basketEmoji = '🧺';
 
-            if (Math.random() < 0.03) {
-                let isFruit = Math.random() > 0.2;
-                items.push({
-                    x: Math.random() * (canvas.width - 20),
-                    y: 0,
-                    type: isFruit ? 'fruit' : 'bomb',
-                    color: isFruit ? 'green' : 'red'
-                });
-            }
+    // Geser keranjang kiri (-1) atau kanan (+1)
+    window.moveBasket = function(dir) {
+        const moveStep = 30;
+        basket.x += dir * moveStep;
+        if (basket.x < 0) basket.x = 0;
+        if (basket.x > canvas.width - basket.size) basket.x = canvas.width - basket.size;
+    };
 
-            items.forEach((item, index) => {
-                item.y += 3;
-                if (item.y > canvas.height) items.splice(index, 1);
-                if (item.x < basket.x + basket.width && item.x + 20 > basket.x && item.y < basket.y + basket.height && item.y + 20 > basket.y) {
-                    if (item.type === 'fruit') {
-                        score++;
-                    } else {
-                        endGame();
-                    }
-                    items.splice(index, 1);
+    function gameLoop() {
+        if (gameOver) return;
+
+        // Tambahkan item baru
+        if (Math.random() < 0.03) {
+            let isFruit = Math.random() > 0.2;
+            items.push({
+                x: Math.random() * (canvas.width - 30),
+                y: 0,
+                type: isFruit ? 'fruit' : 'bomb',
+                emoji: isFruit ? fruits[Math.floor(Math.random() * fruits.length)] : bomb
+            });
+        }
+
+        // Update posisi item
+        items.forEach((item, index) => {
+            item.y += 3;
+            if (item.y > canvas.height) items.splice(index, 1);
+
+            // Deteksi tabrakan dengan keranjang
+            if (
+                item.x < basket.x + basket.size &&
+                item.x + 30 > basket.x &&
+                item.y < basket.y + basket.size &&
+                item.y + 30 > basket.y
+            ) {
+                if (item.type === 'fruit') {
+                    score++;
+                } else {
+                    endGame();
                 }
-            });
+                items.splice(index, 1);
+            }
+        });
 
-            // Draw
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'brown';
-            ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
-            items.forEach(item => {
-                ctx.fillStyle = item.color;
-                ctx.beginPath();
-                ctx.arc(item.x + 10, item.y + 10, 10, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            ctx.fillStyle = 'white';
-            ctx.font = '20px Arial';
-            ctx.fillText(`Skor: ${score}`, 10, 25);
-            
-            activeGameLoop = requestAnimationFrame(gameLoop);
-        }
+        // Gambar semua elemen
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '28px serif';
 
-        function endGame() {
-            gameOver = true;
-            cancelAnimationFrame(activeGameLoop);
-            showResult(`Game Over! Skor akhir: ${score}. Kamu dapat ${score*2} koin.`, false);
-            updateCoins(score * 2);
-            gameContent.innerHTML += `<br><br><button class="game-action-btn" onclick="tangkapBuah()">Main Lagi</button>`;
-        }
-        gameLoop();
+        items.forEach(item => {
+            ctx.fillText(item.emoji, item.x, item.y);
+        });
+
+        ctx.fillText(basketEmoji, basket.x, basket.y);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Arial';
+        ctx.fillText(`Skor: ${score}`, 10, 25);
+
+        activeGameLoop = requestAnimationFrame(gameLoop);
     }
 
+    function endGame() {
+        gameOver = true;
+        cancelAnimationFrame(activeGameLoop);
+        showResult(`Game Over! Skor akhir: ${score}. Kamu dapat ${score * 2} koin.`, false);
+        updateCoins(score * 2);
+        gameContent.innerHTML += `<br><br><button class="game-action-btn" onclick="tangkapBuah()">Main Lagi</button>`;
+    }
+
+    gameLoop();
+}
   </script>
  
 </body>
